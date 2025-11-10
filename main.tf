@@ -1,3 +1,10 @@
+/**
+ * # pippi.io/talos-cluster
+ *
+ * This Terraform module automates the configuration of a Talos cluster.
+ *
+ */
+
 locals {
   node_types          = toset([for node in values(var.cluster.nodes) : node.type])
   control_plane_nodes = { for k, v in var.cluster.nodes : k => v if v.type == "controlplane" }
