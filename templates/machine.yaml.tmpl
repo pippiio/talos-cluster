@@ -1,0 +1,36 @@
+machine:
+  certSANs:
+  - ${hostname}
+
+%{ for _id, _interface in interfaces ~}
+%{ if _interface.ipv4 != null }
+  - ${_interface.ipv4}
+%{ endif }
+
+%{ endfor ~}
+
+%{ if cluster_endpoint != "" }
+  - ${cluster_endpoint}
+%{ endif }
+
+  install:
+    disk: ${install_disk}
+
+  network:
+    hostname: ${hostname}
+
+    interfaces:
+%{ for _id, _interface in interfaces ~}
+    - interface: ${_id}
+      dhcp: ${_interface.dhcp}
+%{ if !_interface.dhcp && _interface.ipv4 != null }
+      addresses:
+        - ${_interface.ipv4}/24
+
+      routes:
+%{ for _network, _gateway in _interface.routes ~}
+        - network: ${_network}
+          gateway: ${_gateway}
+%{ endfor ~}
+%{ endif }
+%{ endfor ~}
