@@ -18,15 +18,12 @@ jobs:
     steps:
       # Git Checkout
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
 
       # MegaLinter
       - name: MegaLinter
         id: ml
-        # You can override MegaLinter flavor used to have faster performances
-        # More info at https://megalinter.github.io/flavors/
-        # uses: oxsecurity/megalinter@v6
-        uses: oxsecurity/megalinter/flavors/terraform@v6
+        uses: oxsecurity/megalinter/flavors/terraform@v9
         env:
           # All available variables are described in documentation
           # https://megalinter.github.io/configuration/
@@ -35,8 +32,8 @@ jobs:
 
       # Upload MegaLinter artifacts
       - name: Archive production artifacts
-        if: ${{ success() }} || ${{ failure() }}
-        uses: actions/upload-artifact@v3
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
         with:
           name: MegaLinter reports
           path: |

@@ -9,3 +9,8 @@ output "kubeconfig" {
   value       = talos_cluster_kubeconfig.kubeconfig
   sensitive   = true
 }
+
+output "health" {
+  description = "Cluster health"
+  value       = data.talos_cluster_health.this
+}
