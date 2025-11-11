@@ -9,6 +9,10 @@ locals {
   node_types          = toset([for node in values(var.cluster.nodes) : node.type])
   control_plane_nodes = { for k, v in var.cluster.nodes : k => v if v.type == "controlplane" }
   worker_nodes        = { for k, v in var.cluster.nodes : k => v if v.type == "worker" }
+  control_plane_ips = toset(compact(flatten([
+    for node in local.control_plane_nodes : [
+      for interface in node.interfaces : interface.ipv4
+  ]])))
 }
 
 data "talos_machine_configuration" "this" {
@@ -22,13 +26,13 @@ data "talos_machine_configuration" "this" {
 
 data "talos_client_configuration" "this" {
   cluster_name         = var.cluster.name
-  endpoints            = keys(local.control_plane_nodes)
+  endpoints            = local.control_plane_ips
   client_configuration = talos_machine_secrets.this.client_configuration
 
   depends_on = [talos_machine_bootstrap.this]
 }
 
-# # Generate machine secrets for Talos cluster
+# Generate machine secrets for Talos cluster
 resource "talos_machine_secrets" "this" {}
 
 resource "talos_machine_configuration_apply" "this" {
@@ -49,7 +53,6 @@ resource "talos_machine_configuration_apply" "this" {
             routes = coalesce(interface.routes, var.cluster.default_routes)
           })
         }
-        # default_routes = var.cluster.default_routes
     }), "/\\n\\n+/", "\n")
   ]
 }
@@ -70,7 +73,6 @@ resource "talos_cluster_kubeconfig" "kubeconfig" {
 
 data "talos_cluster_health" "this" {
   client_configuration = data.talos_client_configuration.this.client_configuration
-  control_plane_nodes  = keys(local.control_plane_nodes)
-  worker_nodes         = keys(local.worker_nodes)
+  control_plane_nodes  = local.control_plane_ips
   endpoints            = [var.cluster.hostname]
 }

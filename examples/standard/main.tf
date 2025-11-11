@@ -47,4 +47,5 @@ module "cluster" {
     default_routes = {
       "0.0.0.0/0" = "192.168.1.1"
     }
+  }
 }
