@@ -13,6 +13,10 @@ locals {
     for node in local.control_plane_nodes : [
       for interface in node.interfaces : interface.ipv4
   ]])))
+    worker_ips = toset(compact(flatten([
+    for node in local.worker_nodes : [
+      for interface in node.interfaces : interface.ipv4
+  ]])))
 }
 
 data "talos_machine_configuration" "this" {
