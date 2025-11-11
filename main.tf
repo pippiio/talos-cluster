@@ -13,7 +13,7 @@ locals {
     for node in local.control_plane_nodes : [
       for interface in node.interfaces : interface.ipv4
   ]])))
-    worker_ips = toset(compact(flatten([
+  worker_ips = toset(compact(flatten([
     for node in local.worker_nodes : [
       for interface in node.interfaces : interface.ipv4
   ]])))
@@ -78,5 +78,6 @@ resource "talos_cluster_kubeconfig" "kubeconfig" {
 data "talos_cluster_health" "this" {
   client_configuration = data.talos_client_configuration.this.client_configuration
   control_plane_nodes  = local.control_plane_ips
+  worker_nodes         = local.worker_ips
   endpoints            = [var.cluster.hostname]
 }
