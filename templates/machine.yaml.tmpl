@@ -1,20 +1,16 @@
 machine:
+  type: ${type}
+
   certSANs:
   - ${hostname}
-
 %{ for _id, _interface in interfaces ~}
 %{ if _interface.ipv4 != null }
   - ${_interface.ipv4}
 %{ endif }
-
 %{ endfor ~}
-
 %{ if cluster_endpoint != "" }
   - ${cluster_endpoint}
 %{ endif }
-
-  install:
-    disk: ${install_disk}
 
   network:
     hostname: ${hostname}
@@ -25,7 +21,7 @@ machine:
       dhcp: ${_interface.dhcp}
 %{ if !_interface.dhcp && _interface.ipv4 != null }
       addresses:
-        - ${_interface.ipv4}/24
+        - ${_interface.ipv4}/32
 
       routes:
 %{ for _network, _gateway in _interface.routes ~}
@@ -34,3 +30,45 @@ machine:
 %{ endfor ~}
 %{ endif }
 %{ endfor ~}
+
+%{ if length(disks) > 0 }
+  disks:
+%{ for _dev, _mountpath in disks ~}
+  - device: ${_dev}
+    partitions:
+    - mountpoint: ${_mountpath}
+%{ endfor ~}
+%{ endif }
+
+  install:
+    disk: ${install_disk}
+    wipe: true
+
+  systemDiskEncryption:
+    state:
+      provider: luks2
+      keys:
+        - nodeID: {}
+          slot: 0
+        - nodeID: {}
+          slot: 1
+    ephemeral:
+      provider: luks2
+      keys:
+        - nodeID: {}
+          slot: 0
+        - nodeID: {}
+          slot: 1
+
+%{ if length(time_servers) > 0 }
+  time:
+    disabled: false
+    servers:
+%{ for _server in time_servers ~}
+    - ${_server}
+%{ endfor ~}
+%{ endif }
+
+cluster:
+  adminKubeconfig:
+    certLifetime: 12h0m0s
