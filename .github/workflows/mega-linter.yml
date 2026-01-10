@@ -17,4 +17,4 @@ jobs:
     name: Terraform MegaLinter
     runs-on: ubuntu-24.04
     steps:
-      - uses: pippiio/actions/lint/megalinter/terraform@feat/change-exclude-env
+      - uses: pippiio/actions/lint/megalinter/terraform@v0
