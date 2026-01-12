@@ -1,8 +1,0 @@
----
-# https://megalinter.io/latest/configuration/
-DISABLE_ERRORS_LINTERS:
-  - REPOSITORY_CHECKOV
-  - REPOSITORY_CHECKOV
-  - TERRAFORM_CHECKOV
-  - TERRAFORM_TERRASCAN
-  - SPELL_CSPELL

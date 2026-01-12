@@ -1,11 +1,15 @@
 provider "talos" {}
 
+terraform {
+  required_version = ">= 1.14"
+}
+
 module "cluster" {
-  source = "git@github.com:pippi.io/talos-cluster?ref=HEAD"
+  source = "git@github.com:pippi.io/talos-cluster?ref=a401732fe4c3f6b273caf84904a3110c336f94fe"
 
   cluster = {
-    hostname      = "k8s.pippi.io"
-    name          = "pippi"
+    hostname = "k8s.pippi.io"
+    name     = "pippi"
 
     nodes = {
       "node1.k8s.pippi.io" = {
