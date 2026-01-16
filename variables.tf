@@ -37,6 +37,7 @@ variable "cluster" {
       type         = string
       install_disk = string
       disks        = optional(map(string), {})
+      image        = optional(string)
       interfaces = map(object({
         dhcp   = bool
         ipv4   = optional(string)
@@ -45,8 +46,11 @@ variable "cluster" {
       temporary_ip = optional(string)
     }))
 
-    time_servers   = optional(set(string), [])
-    default_routes = optional(map(string), {})
+    image                 = optional(string)
+    nameservers           = optional(list(string), [])
+    time_servers          = optional(set(string), [])
+    default_routes        = optional(map(string), {})
+    kubeadm_cert_lifetime = optional(string, "12h0m0s")
   })
 
   nullable = false

@@ -14,6 +14,12 @@ machine:
 
   network:
     hostname: ${hostname}
+%{ if try(length(nameservers), 0) > 0 ~}
+    nameservers:
+%{ for ns in nameservers ~}
+      - ${ns}
+%{ endfor ~}
+%{ endif ~}
 
     interfaces:
 %{ for _id, _interface in interfaces ~}
@@ -43,6 +49,9 @@ machine:
   install:
     disk: ${install_disk}
     wipe: true
+%{ if try(image, null) != null ~}
+    image: ${image}
+%{ endif }
 
   systemDiskEncryption:
     state:
@@ -71,4 +80,4 @@ machine:
 
 cluster:
   adminKubeconfig:
-    certLifetime: 12h0m0s
+    certLifetime: ${kubeadm_cert_lifetime}
