@@ -38,6 +38,7 @@ variable "cluster" {
       install_disk = string
       disks        = optional(map(string), {})
       image        = optional(string)
+      hostname     = optional(string) # defaults to key
       interfaces = map(object({
         dhcp   = bool
         ipv4   = optional(string)

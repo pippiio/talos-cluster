@@ -13,7 +13,6 @@ machine:
 %{ endif }
 
   network:
-    hostname: ${hostname}
 %{ if try(length(nameservers), 0) > 0 ~}
     nameservers:
 %{ for ns in nameservers ~}

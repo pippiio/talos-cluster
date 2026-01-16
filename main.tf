@@ -43,7 +43,7 @@ resource "talos_machine_configuration_apply" "this" {
       templatefile("${path.module}/templates/machine.yaml.tmpl", {
         type                  = each.value.type
         cluster_endpoint      = var.cluster.hostname
-        hostname              = each.key
+        hostname              = coalesce(each.value.hostname, each.key)
         install_disk          = each.value.install_disk
         disks                 = each.value.disks
         image                 = try(coalesce(each.value.image, var.cluster.image), null)
@@ -55,7 +55,13 @@ resource "talos_machine_configuration_apply" "this" {
             routes = coalesce(interface.routes, var.cluster.default_routes)
           })
         }
-    }), "/\\n\\n+/", "\n")
+    }), "/\\n\\n+/", "\n"),
+    yamlencode({
+      apiVersion = "v1alpha1"
+      kind       = "HostnameConfig"
+      auto       = "off"
+      hostname   = coalesce(each.value.hostname, each.key)
+    }),
   ]
 }
 
