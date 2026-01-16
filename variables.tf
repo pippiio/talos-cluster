@@ -2,7 +2,7 @@ locals {
   hostname_pattern = "^[a-z0-9][a-z0-9-]*(\\.[a-z0-9][a-z0-9-]*)*$"
   ipv4_pattern     = "^(25[0-5]|2[0-4]\\d|1?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|1?\\d?\\d)){3}$"
   cidr_pattern     = "^(25[0-5]|2[0-4]\\d|1?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|1?\\d?\\d)){3}\\/(3[0-2]|[12]?\\d)$"
-  device_pattern   = "^\\/dev\\/((?:sd|hd|vd)[a-z][0-9]*|nvme[0-9]+n[0-9]+p?[0-9]*)$"
+  device_pattern   = "^/dev/(disk/by-id/[^/]+|(?:sd|hd|vd)[a-z][0-9]*|nvme[0-9]+n[0-9]+p?[0-9]*)$"
 }
 
 variable "cluster" {
@@ -77,7 +77,7 @@ variable "cluster" {
   }
 
   validation {
-    error_message = "One or more invalid cluster.nodes[].install_disk. Use valid device path, eg. /dev/sda"
+    error_message = "One or more invalid cluster.nodes[].install_disk. Use valid device path, eg. /dev/sda or /dev/disk/by-id/nvme-eui.1234"
     condition = alltrue([
       for _ in values(var.cluster.nodes) :
       can(regex(local.device_pattern, _.install_disk))
@@ -85,7 +85,7 @@ variable "cluster" {
   }
 
   validation {
-    error_message = "One or more invalid cluster.nodes[].disks key. Use valid device path, eg. /dev/sda"
+    error_message = "One or more invalid cluster.nodes[].disks key. Use valid device path, eg. /dev/sda or /dev/disk/by-id/nvme-eui.1234"
     condition = alltrue(flatten([
       for node in values(var.cluster.nodes) : [
         for device in keys(node.disks) : can(regex(local.device_pattern, device))
