@@ -40,9 +40,18 @@ variable "cluster" {
       image        = optional(string)
       hostname     = optional(string) # defaults to key
       interfaces = map(object({
-        dhcp   = bool
-        ipv4   = optional(string)
-        routes = optional(map(string))
+        dhcp        = bool
+        ipv4        = optional(string)
+        cidr_prefix = optional(string, "24")
+        routes      = optional(map(string))
+        mtu         = optional(number)
+        bond = optional(object({
+          mode             = optional(string, "active+backup")
+          miimon           = optional(number, 100)
+          lacp_rate        = optional(string)
+          xmit_hash_policy = optional(string)
+          interfaces       = list(string)
+      }))
       }))
       temporary_ip = optional(string)
     }))

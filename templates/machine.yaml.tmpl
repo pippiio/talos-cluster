@@ -23,10 +23,14 @@ machine:
     interfaces:
 %{ for _id, _interface in interfaces ~}
     - interface: ${_id}
+%{ if try(_interface.mtu, null) != null ~}
+      mtu: ${_interface.mtu}
+%{ endif }
+
       dhcp: ${_interface.dhcp}
 %{ if !_interface.dhcp && _interface.ipv4 != null }
       addresses:
-        - ${_interface.ipv4}/32
+        - ${_interface.ipv4}/${_interface.cidr_prefix}
 
       routes:
 %{ for _network, _gateway in _interface.routes ~}
@@ -34,6 +38,22 @@ machine:
           gateway: ${_gateway}
 %{ endfor ~}
 %{ endif }
+
+%{ if try(_interface.bond, null) != null ~}
+      bond:
+        mode: ${_interface.bond.mode}
+        miimon: ${_interface.bond.miimon}
+%{ if try(_interface.bond.lacp_rate, null) != null ~}
+        lacpRate: ${_interface.bond.lacp_rate}
+%{ endif }
+%{ if try(_interface.bond.xmit_hash_policy, null) != null ~}
+        xmitHashPolicy: ${_interface.bond.xmit_hash_policy}
+%{ endif }
+        interfaces:
+%{ for _bondinterface in _interface.bond.interfaces ~}
+          - ${_bondinterface}
+%{ endfor ~}
+%{ endif ~}
 %{ endfor ~}
 
 %{ if length(disks) > 0 }
