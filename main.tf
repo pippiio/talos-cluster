@@ -46,6 +46,7 @@ resource "talos_machine_configuration_apply" "this" {
         hostname              = coalesce(each.value.hostname, each.key)
         install_disk          = each.value.install_disk
         disks                 = each.value.disks
+        encryption            = var.cluster.encryption
         image                 = try(coalesce(each.value.image, var.cluster.image), null)
         time_servers          = var.cluster.time_servers
         nameservers           = var.cluster.nameservers

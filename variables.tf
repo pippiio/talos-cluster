@@ -51,11 +51,19 @@ variable "cluster" {
           lacp_rate        = optional(string)
           xmit_hash_policy = optional(string)
           interfaces       = list(string)
-      }))
+        }))
       }))
       temporary_ip = optional(string)
     }))
 
+    encryption = optional(object({
+      enabled    = bool
+      node_id    = optional(bool, false)
+      passphrase = optional(string)
+      }), {
+      enabled = true
+      node_id = true
+    })
     image                 = optional(string)
     nameservers           = optional(list(string), [])
     time_servers          = optional(set(string), [])
@@ -145,6 +153,21 @@ variable "cluster" {
     condition = alltrue(flatten([
       for gateway in values(var.cluster.default_routes) : can(regex(local.ipv4_pattern, gateway))
     ]))
+  }
+
+  validation {
+    error_message = "When encryption is enabled, exactly one of `node_id = true` or `passphrase` must be set (but not both)."
+    condition = (
+      var.cluster.encryption.enabled == false
+      ||
+      (
+        # exactly one of these must be set
+        (
+          (var.cluster.encryption.node_id ? 1 : 0) +
+          (coalesce(var.cluster.encryption.passphrase != null && var.cluster.encryption.passphrase != "", false) ? 1 : 0)
+        ) == 1
+      )
+    )
   }
 }
 

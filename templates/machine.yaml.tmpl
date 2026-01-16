@@ -72,21 +72,35 @@ machine:
     image: ${image}
 %{ endif }
 
+%{ if encryption.enabled }
   systemDiskEncryption:
+%{ if encryption.node_id }
     state:
       provider: luks2
       keys:
         - nodeID: {}
           slot: 0
-        - nodeID: {}
-          slot: 1
     ephemeral:
       provider: luks2
       keys:
         - nodeID: {}
           slot: 0
-        - nodeID: {}
-          slot: 1
+%{ endif }
+%{ if try(encryption.passphrase, null) != null ~}
+    state:
+      provider: luks2
+      keys:
+        - static:
+            passphrase: ${encryption.passphrase}
+          slot: 0
+    ephemeral:
+      provider: luks2
+      keys:
+        - static:
+            passphrase: ${encryption.passphrase}
+          slot: 0
+%{ endif }
+%{ endif }
 
 %{ if length(time_servers) > 0 }
   time:
