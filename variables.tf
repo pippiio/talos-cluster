@@ -2,7 +2,7 @@ locals {
   hostname_pattern = "^[a-z0-9][a-z0-9-]*(\\.[a-z0-9][a-z0-9-]*)*$"
   ipv4_pattern     = "^(25[0-5]|2[0-4]\\d|1?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|1?\\d?\\d)){3}$"
   cidr_pattern     = "^(25[0-5]|2[0-4]\\d|1?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|1?\\d?\\d)){3}\\/(3[0-2]|[12]?\\d)$"
-  device_pattern   = "^\\/dev\\/((?:sd|hd|vd)[a-z][0-9]*|nvme[0-9]+n[0-9]+p?[0-9]*)$"
+  device_pattern   = "^/dev/(disk/by-id/[^/]+|(?:sd|hd|vd)[a-z][0-9]*|nvme[0-9]+n[0-9]+p?[0-9]*)$"
 }
 
 variable "cluster" {
@@ -37,16 +37,38 @@ variable "cluster" {
       type         = string
       install_disk = string
       disks        = optional(map(string), {})
+      image        = optional(string)
+      hostname     = optional(string) # defaults to key
       interfaces = map(object({
-        dhcp   = bool
-        ipv4   = optional(string)
-        routes = optional(map(string))
+        dhcp        = bool
+        ipv4        = optional(string)
+        cidr_prefix = optional(string, "24")
+        routes      = optional(map(string))
+        mtu         = optional(number)
+        bond = optional(object({
+          mode             = optional(string, "active+backup")
+          miimon           = optional(number, 100)
+          lacp_rate        = optional(string)
+          xmit_hash_policy = optional(string)
+          interfaces       = list(string)
+        }))
       }))
       temporary_ip = optional(string)
     }))
 
-    time_servers   = optional(set(string), [])
-    default_routes = optional(map(string), {})
+    encryption = optional(object({
+      enabled    = bool
+      node_id    = optional(bool, false)
+      passphrase = optional(string)
+      }), {
+      enabled = true
+      node_id = true
+    })
+    image                 = optional(string)
+    nameservers           = optional(list(string), [])
+    time_servers          = optional(set(string), [])
+    default_routes        = optional(map(string), {})
+    kubeadm_cert_lifetime = optional(string, "12h0m0s")
   })
 
   nullable = false
@@ -77,7 +99,7 @@ variable "cluster" {
   }
 
   validation {
-    error_message = "One or more invalid cluster.nodes[].install_disk. Use valid device path, eg. /dev/sda"
+    error_message = "One or more invalid cluster.nodes[].install_disk. Use valid device path, eg. /dev/sda or /dev/disk/by-id/nvme-eui.1234"
     condition = alltrue([
       for _ in values(var.cluster.nodes) :
       can(regex(local.device_pattern, _.install_disk))
@@ -85,7 +107,7 @@ variable "cluster" {
   }
 
   validation {
-    error_message = "One or more invalid cluster.nodes[].disks key. Use valid device path, eg. /dev/sda"
+    error_message = "One or more invalid cluster.nodes[].disks key. Use valid device path, eg. /dev/sda or /dev/disk/by-id/nvme-eui.1234"
     condition = alltrue(flatten([
       for node in values(var.cluster.nodes) : [
         for device in keys(node.disks) : can(regex(local.device_pattern, device))
@@ -131,6 +153,21 @@ variable "cluster" {
     condition = alltrue(flatten([
       for gateway in values(var.cluster.default_routes) : can(regex(local.ipv4_pattern, gateway))
     ]))
+  }
+
+  validation {
+    error_message = "When encryption is enabled, exactly one of `node_id = true` or `passphrase` must be set (but not both)."
+    condition = (
+      var.cluster.encryption.enabled == false
+      ||
+      (
+        # exactly one of these must be set
+        (
+          (var.cluster.encryption.node_id ? 1 : 0) +
+          (coalesce(var.cluster.encryption.passphrase != null && var.cluster.encryption.passphrase != "", false) ? 1 : 0)
+        ) == 1
+      )
+    )
   }
 }
 

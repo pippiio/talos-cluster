@@ -13,15 +13,24 @@ machine:
 %{ endif }
 
   network:
-    hostname: ${hostname}
+%{ if try(length(nameservers), 0) > 0 ~}
+    nameservers:
+%{ for ns in nameservers ~}
+      - ${ns}
+%{ endfor ~}
+%{ endif ~}
 
     interfaces:
 %{ for _id, _interface in interfaces ~}
     - interface: ${_id}
+%{ if try(_interface.mtu, null) != null ~}
+      mtu: ${_interface.mtu}
+%{ endif }
+
       dhcp: ${_interface.dhcp}
 %{ if !_interface.dhcp && _interface.ipv4 != null }
       addresses:
-        - ${_interface.ipv4}/32
+        - ${_interface.ipv4}/${_interface.cidr_prefix}
 
       routes:
 %{ for _network, _gateway in _interface.routes ~}
@@ -29,6 +38,22 @@ machine:
           gateway: ${_gateway}
 %{ endfor ~}
 %{ endif }
+
+%{ if try(_interface.bond, null) != null ~}
+      bond:
+        mode: ${_interface.bond.mode}
+        miimon: ${_interface.bond.miimon}
+%{ if try(_interface.bond.lacp_rate, null) != null ~}
+        lacpRate: ${_interface.bond.lacp_rate}
+%{ endif }
+%{ if try(_interface.bond.xmit_hash_policy, null) != null ~}
+        xmitHashPolicy: ${_interface.bond.xmit_hash_policy}
+%{ endif }
+        interfaces:
+%{ for _bondinterface in _interface.bond.interfaces ~}
+          - ${_bondinterface}
+%{ endfor ~}
+%{ endif ~}
 %{ endfor ~}
 
 %{ if length(disks) > 0 }
@@ -43,22 +68,39 @@ machine:
   install:
     disk: ${install_disk}
     wipe: true
+%{ if try(image, null) != null ~}
+    image: ${image}
+%{ endif }
 
+%{ if encryption.enabled }
   systemDiskEncryption:
+%{ if encryption.node_id }
     state:
       provider: luks2
       keys:
         - nodeID: {}
           slot: 0
-        - nodeID: {}
-          slot: 1
     ephemeral:
       provider: luks2
       keys:
         - nodeID: {}
           slot: 0
-        - nodeID: {}
-          slot: 1
+%{ endif }
+%{ if try(encryption.passphrase, null) != null ~}
+    state:
+      provider: luks2
+      keys:
+        - static:
+            passphrase: ${encryption.passphrase}
+          slot: 0
+    ephemeral:
+      provider: luks2
+      keys:
+        - static:
+            passphrase: ${encryption.passphrase}
+          slot: 0
+%{ endif }
+%{ endif }
 
 %{ if length(time_servers) > 0 }
   time:
@@ -71,4 +113,4 @@ machine:
 
 cluster:
   adminKubeconfig:
-    certLifetime: 12h0m0s
+    certLifetime: ${kubeadm_cert_lifetime}
