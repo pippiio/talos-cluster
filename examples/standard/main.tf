@@ -4,8 +4,8 @@ module "cluster" {
   source = "git@github.com:pippi.io/talos-cluster?ref=HEAD"
 
   cluster = {
-    hostname      = "k8s.pippi.io"
-    name          = "pippi"
+    hostname = "k8s.pippi.io"
+    name     = "pippi"
 
     nodes = {
       "node1.k8s.pippi.io" = {

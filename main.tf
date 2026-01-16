@@ -58,6 +58,15 @@ resource "talos_machine_configuration_apply" "this" {
         }
     }), "/\\n\\n+/", "\n"),
     yamlencode({
+      cluster = {
+        network = {
+          cni = {
+            name = "custom"
+          }
+        }
+      }
+    }),
+    yamlencode({
       apiVersion = "v1alpha1"
       kind       = "HostnameConfig"
       auto       = "off"
@@ -114,6 +123,9 @@ data "talos_machine_disks" "this" {
   client_configuration = talos_machine_secrets.this.client_configuration
   node                 = each.key
   selector             = var.cluster.disk_selector
+  depends_on = [
+    talos_machine_configuration_apply.this,
+  ]
 }
 
 locals {
