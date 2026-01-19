@@ -64,6 +64,7 @@ variable "cluster" {
       enabled = true
       node_id = true
     })
+    virtual_ip            = optional(string)
     image                 = optional(string)
     nameservers           = optional(list(string), [])
     time_servers          = optional(set(string), [])

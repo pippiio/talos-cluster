@@ -47,6 +47,7 @@ resource "talos_machine_configuration_apply" "this" {
         install_disk          = each.value.install_disk
         disks                 = each.value.disks
         encryption            = var.cluster.encryption
+        virtual_ip            = var.cluster.virtual_ip
         image                 = try(coalesce(each.value.image, var.cluster.image), null)
         time_servers          = var.cluster.time_servers
         nameservers           = var.cluster.nameservers
