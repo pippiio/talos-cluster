@@ -26,6 +26,10 @@ machine:
 %{ if try(_interface.mtu, null) != null ~}
       mtu: ${_interface.mtu}
 %{ endif }
+%{ if try(virtual_ip, null) != null && type == "controlplane" }
+      vip:
+        ip: ${virtual_ip}
+%{ endif }
 
       dhcp: ${_interface.dhcp}
 %{ if !_interface.dhcp && _interface.ipv4 != null }
