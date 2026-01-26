@@ -33,9 +33,9 @@ machine:
 %{ endif ~}
 
   network:
-%{ if try(length(nameservers), 0) > 0 ~}
+%{ if try(length(name_servers), 0) > 0 ~}
     nameservers:
-%{ for ns in nameservers ~}
+%{ for ns in name_servers ~}
       - ${ns}
 %{ endfor ~}
 %{ endif ~}

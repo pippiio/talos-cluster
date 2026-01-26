@@ -29,6 +29,7 @@ variable "cluster" {
               dhcp: true to enable dhcp
               ipv4: ipv4 address
               routes: A map of routes structured <network-cidr>=<gateway-ip>
+      name_servers: A list of the nameservers to use in the cluster
       time_servers: A set of NTP time server hostnames used for nodes
       default_routes: A map of default routes structured <network-cidr>=<gateway-ip>
       schedule_on_controlplanes: Enalbes scheduling on the control plane nodes
@@ -74,7 +75,13 @@ variable "cluster" {
       enabled = true
       node_id = true
     })
+    virtual_ip                = optional(string)
+    image                     = optional(string)
+    name_servers              = optional(list(string), [])
+    time_servers              = optional(set(string), [])
+    default_routes            = optional(map(string), {})
     schedule_on_controlplanes = optional(bool, false)
+    kubeadm_cert_lifetime     = optional(string, "12h0m0s")
   })
 
   nullable = false
