@@ -29,6 +29,9 @@ variable "cluster" {
               dhcp: true to enable dhcp
               ipv4: ipv4 address
               routes: A map of routes structured <network-cidr>=<gateway-ip>
+      encryption: Encryption options for Talos install disks
+        node_id: Use node_id as the encryption key
+        passphrase: use passphrase as the encryption key
       name_servers: A list of the nameservers to use in the cluster
       time_servers: A set of NTP time server hostnames used for nodes
       default_routes: A map of default routes structured <network-cidr>=<gateway-ip>
@@ -68,11 +71,9 @@ variable "cluster" {
     }))
 
     encryption = optional(object({
-      enabled    = bool
       node_id    = optional(bool, false)
       passphrase = optional(string)
       }), {
-      enabled = true
       node_id = true
     })
     virtual_ip                = optional(string)

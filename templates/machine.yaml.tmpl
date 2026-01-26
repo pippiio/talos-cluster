@@ -96,7 +96,6 @@ machine:
     image: ${image}
 %{ endif }
 
-%{ if encryption.enabled }
   systemDiskEncryption:
 %{ if encryption.node_id }
     state:
@@ -123,7 +122,6 @@ machine:
         - static:
             passphrase: ${encryption.passphrase}
           slot: 0
-%{ endif }
 %{ endif }
 
 %{ if length(time_servers) > 0 }
