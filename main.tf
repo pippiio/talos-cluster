@@ -46,11 +46,13 @@ resource "talos_machine_configuration_apply" "this" {
         hostname              = coalesce(each.value.hostname, each.key)
         install_disk          = each.value.install_disk
         disks                 = each.value.disks
+        labels                = each.value.labels
+        taints                = each.value.taints
         encryption            = var.cluster.encryption
         virtual_ip            = var.cluster.virtual_ip
         image                 = try(coalesce(each.value.image, var.cluster.image), null)
         time_servers          = var.cluster.time_servers
-        nameservers           = var.cluster.nameservers
+        name_servers           = var.cluster.name_servers
         kubeadm_cert_lifetime = var.cluster.kubeadm_cert_lifetime
         interfaces = { for id, interface in each.value.interfaces :
           id => merge(interface, {
@@ -65,6 +67,7 @@ resource "talos_machine_configuration_apply" "this" {
             name = "custom"
           }
         }
+        allowSchedulingOnControlPlanes = var.cluster.schedule_on_controlplanes
       }
     }),
     yamlencode({

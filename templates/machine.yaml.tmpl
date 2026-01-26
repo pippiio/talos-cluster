@@ -12,10 +12,30 @@ machine:
   - ${cluster_endpoint}
 %{ endif }
 
+%{ if try(length(labels), 0) > 0 }
+  nodeLabels:
+%{ for _label, _value in labels ~}
+    ${_label}: ${_value}
+%{ endfor ~}
+%{ endif ~}
+
+%{ if try(length(taints), 0) > 0 ~}
+  kubelet:
+    extraConfig:
+      registerWithTaints:
+%{ for _key, _taint in taints ~}
+      - key: ${_key}
+        effect: ${_taint.effect}
+%{ if try(_taint.value, null) != null }
+        value: ${_taint.value}
+%{ endif ~}
+%{ endfor ~}
+%{ endif ~}
+
   network:
-%{ if try(length(nameservers), 0) > 0 ~}
+%{ if try(length(name_servers), 0) > 0 ~}
     nameservers:
-%{ for ns in nameservers ~}
+%{ for ns in name_servers ~}
       - ${ns}
 %{ endfor ~}
 %{ endif ~}
@@ -76,7 +96,6 @@ machine:
     image: ${image}
 %{ endif }
 
-%{ if encryption.enabled }
   systemDiskEncryption:
 %{ if encryption.node_id }
     state:
@@ -103,7 +122,6 @@ machine:
         - static:
             passphrase: ${encryption.passphrase}
           slot: 0
-%{ endif }
 %{ endif }
 
 %{ if length(time_servers) > 0 }

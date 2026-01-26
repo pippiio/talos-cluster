@@ -18,15 +18,39 @@ variable "cluster" {
           install_disk: The Talos install disk.
           disks: Node disk configuration:
             key: device
-            value: mounitpoint
+            value: mountpoint
+          image: Custom image for installation (overrides cluster image)
+          hostname: Optional hostname (defualts to node key)
+          labels: List of node labels
+          taints: List of node taints
+            key: Taint key
+            value: Taint value
+            effect Taint effect
           interfaces:
             key: interface id
             value:
               dhcp: true to enable dhcp
               ipv4: ipv4 address
+              cidr_prefix: cidr prefix for network (defaults to /24)
               routes: A map of routes structured <network-cidr>=<gateway-ip>
+              mtu: Mtu of network
+              bond: Bond settings for bonding NICs
+                mode: Mode of the bond (defaults to active-backup)
+                miimon: Miimon of the bond (defaults to 100)
+                lacp_rate: Optional lacp rate of the bond
+                xmit_hash_policy: Optional xmit hash policy for the bond
+                interfaces: List of interfaces to bond together
+          temporary_ip: A temporary ip for installation
+      encryption: Encryption options for Talos install disks
+        node_id: Use node_id as the encryption key
+        passphrase: use passphrase as the encryption key
+      virtual_ip: Virtual IP for controlplanes
+      image: Custom image for all nodes
+      name_servers: A list of the nameservers to use in the cluster
       time_servers: A set of NTP time server hostnames used for nodes
       default_routes: A map of default routes structured <network-cidr>=<gateway-ip>
+      schedule_on_controlplanes: Enalbes scheduling on the control plane nodes
+      kubeadm_cert_lifetime: Lifetime of the cubeconfig kubeadm certs (defaults to 12 hours)
   EOF
 
   type = object({
@@ -39,6 +63,11 @@ variable "cluster" {
       disks        = optional(map(string), {})
       image        = optional(string)
       hostname     = optional(string) # defaults to key
+      labels       = optional(map(string), {})
+      taints = optional(map(object({
+        value  = optional(string)
+        effect = string
+      })), {})
       interfaces = map(object({
         dhcp        = bool
         ipv4        = optional(string)
@@ -46,7 +75,7 @@ variable "cluster" {
         routes      = optional(map(string))
         mtu         = optional(number)
         bond = optional(object({
-          mode             = optional(string, "active+backup")
+          mode             = optional(string, "active-backup")
           miimon           = optional(number, 100)
           lacp_rate        = optional(string)
           xmit_hash_policy = optional(string)
@@ -57,19 +86,18 @@ variable "cluster" {
     }))
 
     encryption = optional(object({
-      enabled    = bool
       node_id    = optional(bool, false)
       passphrase = optional(string)
       }), {
-      enabled = true
       node_id = true
     })
-    virtual_ip            = optional(string)
-    image                 = optional(string)
-    nameservers           = optional(list(string), [])
-    time_servers          = optional(set(string), [])
-    default_routes        = optional(map(string), {})
-    kubeadm_cert_lifetime = optional(string, "12h0m0s")
+    virtual_ip                = optional(string)
+    image                     = optional(string)
+    name_servers              = optional(list(string), [])
+    time_servers              = optional(set(string), [])
+    default_routes            = optional(map(string), {})
+    schedule_on_controlplanes = optional(bool, false)
+    kubeadm_cert_lifetime     = optional(string, "12h0m0s")
   })
 
   nullable = false
@@ -159,15 +187,10 @@ variable "cluster" {
   validation {
     error_message = "When encryption is enabled, exactly one of `node_id = true` or `passphrase` must be set (but not both)."
     condition = (
-      var.cluster.encryption.enabled == false
-      ||
-      (
-        # exactly one of these must be set
-        (
-          (var.cluster.encryption.node_id ? 1 : 0) +
-          (coalesce(var.cluster.encryption.passphrase != null && var.cluster.encryption.passphrase != "", false) ? 1 : 0)
-        ) == 1
-      )
+      ( # exactly one of these must be set
+        (var.cluster.encryption.node_id ? 1 : 0) +
+        (coalesce(var.cluster.encryption.passphrase != null && var.cluster.encryption.passphrase != "", false) ? 1 : 0)
+      ) == 1
     )
   }
 }
