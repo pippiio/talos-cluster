@@ -31,6 +31,7 @@ variable "cluster" {
               routes: A map of routes structured <network-cidr>=<gateway-ip>
       time_servers: A set of NTP time server hostnames used for nodes
       default_routes: A map of default routes structured <network-cidr>=<gateway-ip>
+      schedule_on_controlplanes: Enalbes scheduling on the control plane nodes
   EOF
 
   type = object({
@@ -73,12 +74,7 @@ variable "cluster" {
       enabled = true
       node_id = true
     })
-    virtual_ip            = optional(string)
-    image                 = optional(string)
-    nameservers           = optional(list(string), [])
-    time_servers          = optional(set(string), [])
-    default_routes        = optional(map(string), {})
-    kubeadm_cert_lifetime = optional(string, "12h0m0s")
+    schedule_on_controlplanes = optional(bool, false)
   })
 
   nullable = false

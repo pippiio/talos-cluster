@@ -67,6 +67,7 @@ resource "talos_machine_configuration_apply" "this" {
             name = "custom"
           }
         }
+        allowSchedulingOnControlPlanes = var.cluster.schedule_on_controlplanes
       }
     }),
     yamlencode({
