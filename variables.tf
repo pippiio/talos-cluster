@@ -18,7 +18,11 @@ variable "cluster" {
           install_disk: The Talos install disk.
           disks: Node disk configuration:
             key: device
-            value: mounitpoint
+          labels: List of node labels
+          taints: List of node taints
+            key: Taint key
+            value: Taint value
+            effect Taint effect
           interfaces:
             key: interface id
             value:
@@ -39,6 +43,11 @@ variable "cluster" {
       disks        = optional(map(string), {})
       image        = optional(string)
       hostname     = optional(string) # defaults to key
+      labels       = optional(map(string), {})
+      taints = optional(map(object({
+        value  = optional(string)
+        effect = string
+      })), {})
       interfaces = map(object({
         dhcp        = bool
         ipv4        = optional(string)

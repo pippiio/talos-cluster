@@ -12,6 +12,26 @@ machine:
   - ${cluster_endpoint}
 %{ endif }
 
+%{ if try(length(labels), 0) > 0 }
+  nodeLabels:
+%{ for _label, _value in labels ~}
+    ${_label}: ${_value}
+%{ endfor ~}
+%{ endif ~}
+
+%{ if try(length(taints), 0) > 0 ~}
+  kubelet:
+    extraConfig:
+      registerWithTaints:
+%{ for _key, _taint in taints ~}
+      - key: ${_key}
+        effect: ${_taint.effect}
+%{ if try(_taint.value, null) != null }
+        value: ${_taint.value}
+%{ endif ~}
+%{ endfor ~}
+%{ endif ~}
+
   network:
 %{ if try(length(nameservers), 0) > 0 ~}
     nameservers:
