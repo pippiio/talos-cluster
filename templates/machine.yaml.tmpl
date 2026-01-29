@@ -19,8 +19,19 @@ machine:
 %{ endfor ~}
 %{ endif ~}
 
-%{ if try(length(taints), 0) > 0 ~}
   kubelet:
+    extraArgs:
+      rotate-server-certificates: true
+
+%{ if try(length(trusted_subnets), 0) > 0 ~}
+    nodeIP:
+      validSubnets:
+%{ for _subnet in trusted_subnets ~}
+        - ${_subnet}
+%{ endfor ~}
+%{ endif ~}
+
+%{ if try(length(taints), 0) > 0 ~}
     extraConfig:
       registerWithTaints:
 %{ for _key, _taint in taints ~}
@@ -54,7 +65,7 @@ machine:
       dhcp: ${_interface.dhcp}
 %{ if !_interface.dhcp && _interface.ipv4 != null }
       addresses:
-        - ${_interface.ipv4}/${_interface.cidr_prefix}
+        - ${_interface.ipv4}
 
       routes:
 %{ for _network, _gateway in _interface.routes ~}

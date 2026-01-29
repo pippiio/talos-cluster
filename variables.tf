@@ -30,10 +30,10 @@ variable "cluster" {
             key: interface id
             value:
               dhcp: true to enable dhcp
-              ipv4: ipv4 address
-              cidr_prefix: cidr prefix for network (defaults to /24)
+              ipv4: ipv4 address, must be a valid cidr ipv4 pattern (e.x. 10.0.0.10/24)
               routes: A map of routes structured <network-cidr>=<gateway-ip>
               mtu: Mtu of network
+              trusted: Shall the interface subnet be trusted and added to the certificates SAN
               bond: Bond settings for bonding NICs
                 mode: Mode of the bond (defaults to active-backup)
                 miimon: Miimon of the bond (defaults to 100)
@@ -71,9 +71,9 @@ variable "cluster" {
       interfaces = map(object({
         dhcp        = bool
         ipv4        = optional(string)
-        cidr_prefix = optional(string, "24")
         routes      = optional(map(string))
         mtu         = optional(number)
+        trusted     = optional(bool, true)
         bond = optional(object({
           mode             = optional(string, "active-backup")
           miimon           = optional(number, 100)
@@ -148,7 +148,7 @@ variable "cluster" {
     condition = alltrue(flatten([
       for node in values(var.cluster.nodes) : [
         for interface in coalesce(node.interfaces, {}) :
-        interface.ipv4 == null || can(regex(local.ipv4_pattern, interface.ipv4))
+        interface.ipv4 == null || can(regex(local.cidr_pattern, interface.ipv4))
     ]]))
   }
 
