@@ -91,6 +91,7 @@ variable "cluster" {
       }), {
       node_id = true
     })
+    subnet                    = string
     virtual_ip                = optional(string)
     image                     = optional(string)
     name_servers              = optional(list(string), [])

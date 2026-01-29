@@ -19,8 +19,13 @@ machine:
 %{ endfor ~}
 %{ endif ~}
 
-%{ if try(length(taints), 0) > 0 ~}
   kubelet:
+    nodeIP:
+      validSubnets:
+        - ${subnet}
+    extraArgs:
+      rotate-server-certificates: true
+%{ if try(length(taints), 0) > 0 ~}
     extraConfig:
       registerWithTaints:
 %{ for _key, _taint in taints ~}
