@@ -25,3 +25,8 @@ output "worker_disks" {
   description = "Talos workernode disks"
   value       = local.worker_disks
 }
+
+output "trusted_subnets" {
+  description = "Talos trusetd subnets added to kublet certificate SAN"
+  value       = local.trusted_subnets
+}

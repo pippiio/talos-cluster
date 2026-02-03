@@ -52,7 +52,8 @@ resource "talos_machine_configuration_apply" "this" {
         virtual_ip            = var.cluster.virtual_ip
         image                 = try(coalesce(each.value.image, var.cluster.image), null)
         time_servers          = var.cluster.time_servers
-        name_servers           = var.cluster.name_servers
+        name_servers          = var.cluster.name_servers
+        trusted_subnets       = local.trusted_subnets
         kubeadm_cert_lifetime = var.cluster.kubeadm_cert_lifetime
         interfaces = { for id, interface in each.value.interfaces :
           id => merge(interface, {
@@ -146,4 +147,12 @@ locals {
         wwid        = disk.wwid
         symlinks    = disk.symlinks
   }]]) : format("%s%s", _.node, _.dev_path) => _ }
+
+  trusted_subnets = toset(
+    flatten([for node, node_value in var.cluster.nodes : [
+      for interface, interface_value in node_value.interfaces : [
+        interface_value.trusted ? [cidrsubnet(interface_value.ipv4, 0, 0)] : []
+      ]
+    ]])
+  )
 }
