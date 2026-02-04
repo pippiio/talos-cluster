@@ -113,6 +113,11 @@ variable "cluster" {
   }
 
   validation {
+    error_message = "At least one node is required."
+    condition     = length(var.cluster.nodes) > 0
+  }
+
+  validation {
     error_message = "One or more invalid cluster.nodes key (hostname)."
     condition = alltrue([
       for _ in keys(var.cluster.nodes) :
