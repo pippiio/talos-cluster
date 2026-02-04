@@ -21,7 +21,7 @@ sections:
 content: |-
   {{ .Header }}
 
-  # Examples
+  ## Examples
 
   ```hcl
   {{ include "examples/standard/main.tf" }}

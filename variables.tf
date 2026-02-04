@@ -29,7 +29,6 @@ variable "cluster" {
           interfaces:
             key: interface id
             value:
-              dhcp: true to enable dhcp
               ipv4: ipv4 address, must be a valid cidr ipv4 pattern (e.x. 10.0.0.10/24)
               routes: A map of routes structured <network-cidr>=<gateway-ip>
               mtu: Mtu of network
@@ -69,11 +68,10 @@ variable "cluster" {
         effect = string
       })), {})
       interfaces = map(object({
-        dhcp        = bool
-        ipv4        = optional(string)
-        routes      = optional(map(string))
-        mtu         = optional(number)
-        trusted     = optional(bool, true)
+        ipv4    = string
+        routes  = optional(map(string))
+        mtu     = optional(number)
+        trusted = optional(bool, true)
         bond = optional(object({
           mode             = optional(string, "active-backup")
           miimon           = optional(number, 100)
@@ -113,8 +111,8 @@ variable "cluster" {
   }
 
   validation {
-    error_message = "At least one node is required."
-    condition     = length(var.cluster.nodes) > 0
+    error_message = "At least one node w. type controlplane is required."
+    condition     = length([for node in var.cluster.nodes : node if node.type == "controlplane"]) > 0
   }
 
   validation {
@@ -153,7 +151,7 @@ variable "cluster" {
     condition = alltrue(flatten([
       for node in values(var.cluster.nodes) : [
         for interface in coalesce(node.interfaces, {}) :
-        interface.ipv4 == null || can(regex(local.cidr_pattern, interface.ipv4))
+        can(regex(local.cidr_pattern, interface.ipv4))
     ]]))
   }
 

@@ -62,8 +62,8 @@ machine:
         ip: ${virtual_ip}
 %{ endif }
 
-      dhcp: ${_interface.dhcp}
-%{ if !_interface.dhcp && _interface.ipv4 != null }
+      dhcp: false
+%{ if _interface.ipv4 != null }
       addresses:
         - ${_interface.ipv4}
 
