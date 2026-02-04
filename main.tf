@@ -93,7 +93,8 @@ resource "talos_cluster_kubeconfig" "this" {
 
   depends_on = [talos_machine_bootstrap.this]
 }
-
+/*
+# wip - Uncommented due to dns lookup error
 data "dns_a_record_set" "control_plane_nodes" {
   for_each = local.control_plane_nodes
 
@@ -121,7 +122,7 @@ data "talos_cluster_health" "this" {
     talos_machine_configuration_apply.this,
   ]
 }
-
+*/
 data "talos_machine_disks" "this" {
   for_each = local.worker_nodes
 

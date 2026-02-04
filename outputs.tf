@@ -16,10 +16,10 @@ output "kubeconfig" {
   sensitive = true
 }
 
-output "healthy" {
-  description = "True once cluster is healthy"
-  value       = can(data.talos_cluster_health.this.id)
-}
+# output "healthy" {
+#   description = "True once cluster is healthy"
+#   value       = can(data.talos_cluster_health.this.id)
+# }
 
 output "worker_disks" {
   description = "Talos workernode disks"
