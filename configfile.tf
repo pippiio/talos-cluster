@@ -1,15 +1,15 @@
 locals {
   talosconfig_path = pathexpand(var.configfile.talosconfig.path)
-  new_talosconfig  = yamldecode(data.talos_client_configuration.this.talos_config)
-  old_talosconfig  = try(yamldecode(file(local.talosconfig_path)), {})
+  new_talosconfig  = sensitive(yamldecode(data.talos_client_configuration.this.talos_config))
+  old_talosconfig  = sensitive(try(yamldecode(file(local.talosconfig_path)), {}))
 
   kubeconfig_path = pathexpand(var.configfile.kubeconfig.path)
-  new_kubeconfig  = yamldecode(talos_cluster_kubeconfig.this.kubeconfig_raw)
-  old_kubeconfig = try(yamldecode(file(local.kubeconfig_path)), {
+  new_kubeconfig  = sensitive(yamldecode(talos_cluster_kubeconfig.this.kubeconfig_raw))
+  old_kubeconfig = sensitive(try(yamldecode(file(local.kubeconfig_path)), {
     clusters = []
     contexts = []
     users    = []
-  })
+  }))
 
   all_kubeconfig_clusters = values(merge(
     { for _ in local.old_kubeconfig.clusters : _.name => _ },
