@@ -20,7 +20,6 @@ variable "cluster" {
             key: device
             value: mountpoint
           image: Custom image for installation (overrides cluster image)
-          hostname: Optional hostname (defualts to node key)
           labels: List of node labels
           taints: List of node taints
             key: Taint key
@@ -61,7 +60,6 @@ variable "cluster" {
       install_disk = string
       disks        = optional(map(string), {})
       image        = optional(string)
-      hostname     = optional(string) # defaults to key
       labels       = optional(map(string), {})
       taints = optional(map(object({
         value  = optional(string)
