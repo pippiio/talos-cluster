@@ -8,6 +8,7 @@ locals {
 variable "cluster" {
   description = <<EOF
     Talos cluster configurastion:
+      check_healty: Enables or disables a healty check towards the cluster, that can be depended on for other tasks
       hostname: The hostname of the talos kubernetes cluster
       name: The name of the talos kubernetes cluster
       disk_selector: CEL expression to filter disks in output
@@ -52,6 +53,7 @@ variable "cluster" {
   EOF
 
   type = object({
+    check_healty  = optional(bool, true)
     hostname      = string
     name          = string
     disk_selector = optional(string, "disk.size > 50u * GB && disk.readonly == false")

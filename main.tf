@@ -104,6 +104,7 @@ resource "talos_cluster_kubeconfig" "this" {
 }
 
 data "talos_cluster_health" "this" {
+  count = var.cluster.check_healty ? 1 : 0
 
   client_configuration = data.talos_client_configuration.this.client_configuration
   control_plane_nodes = [for node in local.control_plane_nodes : one([
