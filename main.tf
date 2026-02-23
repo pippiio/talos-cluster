@@ -34,7 +34,10 @@ resource "talos_machine_secrets" "this" {}
 resource "talos_machine_configuration_apply" "this" {
   for_each = var.cluster.nodes
 
-  node                        = coalesce(each.value.temporary_ip, each.key)
+  node = coalesce(each.value.temporary_ip, one([
+    for interface in each.value.interfaces : split("/", interface.ipv4)[0]
+    if interface.primary
+  ]))
   client_configuration        = talos_machine_secrets.this.client_configuration
   machine_configuration_input = data.talos_machine_configuration.this[each.value.type].machine_configuration
 
@@ -81,7 +84,10 @@ resource "talos_machine_configuration_apply" "this" {
 }
 
 resource "talos_machine_bootstrap" "this" {
-  node                 = keys(local.control_plane_nodes)[0]
+  node                 = one([
+    for interface in values(local.control_plane_nodes)[0].interfaces : split("/", interface.ipv4)[0]
+    if interface.primary
+  ])
   client_configuration = talos_machine_secrets.this.client_configuration
 
   depends_on = [talos_machine_configuration_apply.this]
@@ -89,7 +95,10 @@ resource "talos_machine_bootstrap" "this" {
 
 resource "talos_cluster_kubeconfig" "this" {
   client_configuration = talos_machine_secrets.this.client_configuration
-  node                 = keys(local.control_plane_nodes)[0]
+  node                 = one([
+    for interface in values(local.control_plane_nodes)[0].interfaces : split("/", interface.ipv4)[0]
+    if interface.primary
+  ])
 
   depends_on = [talos_machine_bootstrap.this]
 }
@@ -107,10 +116,17 @@ data "dns_a_record_set" "worker_nodes" {
 }
 
 data "talos_cluster_health" "this" {
+
   client_configuration = data.talos_client_configuration.this.client_configuration
-  control_plane_nodes  = [for _ in data.dns_a_record_set.control_plane_nodes : _.addrs[0]]
-  worker_nodes         = [for _ in data.dns_a_record_set.worker_nodes : _.addrs[0]]
-  endpoints            = [var.cluster.hostname]
+  control_plane_nodes = [for node in local.control_plane_nodes : one([
+    for interface in node.interfaces : split("/", interface.ipv4)[0]
+    if interface.primary
+  ])]
+  worker_nodes = [for node in local.worker_nodes : one([
+    for interface in node.interfaces : split("/", interface.ipv4)[0]
+    if interface.primary
+  ])]
+  endpoints = [var.cluster.hostname]
 
   timeouts = {
     read = "10m"
@@ -126,8 +142,11 @@ data "talos_machine_disks" "this" {
   for_each = local.worker_nodes
 
   client_configuration = talos_machine_secrets.this.client_configuration
-  node                 = each.key
-  selector             = var.cluster.disk_selector
+  node = one([
+    for interface in each.value.interfaces : split("/", interface.ipv4)[0]
+    if interface.primary
+  ])
+  selector = var.cluster.disk_selector
   depends_on = [
     talos_machine_configuration_apply.this,
   ]

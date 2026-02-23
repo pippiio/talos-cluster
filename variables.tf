@@ -70,7 +70,7 @@ variable "cluster" {
         routes  = optional(map(string))
         mtu     = optional(number)
         trusted = optional(bool, true)
-        trusted     = optional(bool, true)
+        primary = optional(bool, true)
         bond = optional(object({
           mode             = optional(string, "active-backup")
           miimon           = optional(number, 100)
