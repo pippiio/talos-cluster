@@ -8,7 +8,8 @@ module "cluster" {
   source = "git@github.com:pippi.io/talos-cluster?ref=a401732fe4c3f6b273caf84904a3110c336f94fe"
 
   cluster = {
-    hostname = "k8s.pippi.io"
+    hostname = "k8s.pippi.io" # Or can be set to the VIP "192.168.1.5" if no DNS is setup
+    vip      = "192.168.1.5"
     name     = "pippi"
 
     nodes = {
@@ -17,8 +18,7 @@ module "cluster" {
         disk = "/dev/sda"
         interfaces = {
           end0 = {
-            dhcp = false
-            ipv4 = "192.168.1.11"
+            ipv4 = "192.168.1.11/24"
           }
         }
       }
@@ -27,18 +27,16 @@ module "cluster" {
         disk = "/dev/sda"
         interfaces = {
           end0 = {
-            dhcp = false
-            ipv4 = "192.168.1.12"
+            ipv4 = "192.168.1.12/24"
           }
         }
       }
       "node3.k8s.pippi.io" = {
         type = "worker"
-        disk = "/dev/sda"
+        disk = "/dev/disk/by-id/nvme-eui.0000000000000001234"
         interfaces = {
           end0 = {
-            dhcp = false
-            ipv4 = "192.168.1.13"
+            ipv4 = "192.168.1.13/24"
           }
         }
       }
@@ -46,5 +44,8 @@ module "cluster" {
     default_routes = {
       "0.0.0.0/0" = "192.168.1.1"
     }
+    name_servers = [
+      "192.168.1.1"
+    ]
   }
 }
