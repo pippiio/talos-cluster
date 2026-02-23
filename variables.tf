@@ -112,6 +112,11 @@ variable "cluster" {
   }
 
   validation {
+    error_message = "At least one node w. type controlplane is required."
+    condition     = length([for node in var.cluster.nodes : node if node.type == "controlplane"]) > 0
+  }
+
+  validation {
     error_message = "One or more invalid cluster.nodes key (hostname)."
     condition = alltrue([
       for _ in keys(var.cluster.nodes) :
@@ -147,7 +152,7 @@ variable "cluster" {
     condition = alltrue(flatten([
       for node in values(var.cluster.nodes) : [
         for interface in coalesce(node.interfaces, {}) :
-        interface.ipv4 == null || can(regex(local.cidr_pattern, interface.ipv4))
+        can(regex(local.cidr_pattern, interface.ipv4))
     ]]))
   }
 
@@ -191,6 +196,16 @@ variable "cluster" {
         (coalesce(var.cluster.encryption.passphrase != null && var.cluster.encryption.passphrase != "", false) ? 1 : 0)
       ) == 1
     )
+  }
+
+  validation {
+    error_message = "Each node must have exactly one interface with primary = true."
+    condition = alltrue([
+      for node in values(var.cluster.nodes) :
+      sum([
+        for interface in node.interfaces : (interface.primary ? 1 : 0)
+      ]) == 1
+    ])
   }
 }
 
