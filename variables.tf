@@ -29,7 +29,6 @@ variable "cluster" {
           interfaces:
             key: interface id
             value:
-              dhcp: true to enable dhcp
               ipv4: ipv4 address, must be a valid cidr ipv4 pattern (e.x. 10.0.0.10/24)
               routes: A map of routes structured <network-cidr>=<gateway-ip>
               mtu: Mtu of network
@@ -69,10 +68,10 @@ variable "cluster" {
         effect = string
       })), {})
       interfaces = map(object({
-        dhcp        = bool
-        ipv4        = optional(string)
-        routes      = optional(map(string))
-        mtu         = optional(number)
+        ipv4    = string
+        routes  = optional(map(string))
+        mtu     = optional(number)
+        trusted = optional(bool, true)
         trusted     = optional(bool, true)
         bond = optional(object({
           mode             = optional(string, "active-backup")

@@ -62,8 +62,7 @@ machine:
         ip: ${virtual_ip}
 %{ endif }
 
-      dhcp: ${_interface.dhcp}
-%{ if !_interface.dhcp && _interface.ipv4 != null }
+      dhcp: false
       addresses:
         - ${_interface.ipv4}
 
@@ -72,7 +71,6 @@ machine:
         - network: ${_network}
           gateway: ${_gateway}
 %{ endfor ~}
-%{ endif }
 
 %{ if try(_interface.bond, null) != null ~}
       bond:
