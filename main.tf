@@ -103,18 +103,6 @@ resource "talos_cluster_kubeconfig" "this" {
   depends_on = [talos_machine_bootstrap.this]
 }
 
-data "dns_a_record_set" "control_plane_nodes" {
-  for_each = local.control_plane_nodes
-
-  host = each.key
-}
-
-data "dns_a_record_set" "worker_nodes" {
-  for_each = local.worker_nodes
-
-  host = each.key
-}
-
 data "talos_cluster_health" "this" {
 
   client_configuration = data.talos_client_configuration.this.client_configuration
