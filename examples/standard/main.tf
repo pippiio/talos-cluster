@@ -18,7 +18,7 @@ module "cluster" {
         disk = "/dev/sda"
         interfaces = {
           end0 = {
-            ipv4 = "192.168.1.11/24"
+            ipv4_address_cidr = "192.168.1.11/24"
           }
         }
       }
@@ -27,7 +27,7 @@ module "cluster" {
         disk = "/dev/sda"
         interfaces = {
           end0 = {
-            ipv4 = "192.168.1.12/24"
+            ipv4_address_cidr = "192.168.1.12/24"
           }
         }
       }
@@ -36,7 +36,7 @@ module "cluster" {
         disk = "/dev/disk/by-id/nvme-eui.0000000000000001234"
         interfaces = {
           end0 = {
-            ipv4 = "192.168.1.13/24"
+            ipv4_address_cidr = "192.168.1.13/24"
           }
         }
       }

@@ -18,7 +18,7 @@ output "kubeconfig" {
 
 output "healthy" {
   description = "True once cluster is healthy"
-  value       = var.cluster.check_healty ? null : can(data.talos_cluster_health.this[0].id)
+  value       = var.cluster.perform_healthcheck ? null : can(data.talos_cluster_health.this[0].id)
 }
 
 output "worker_disks" {

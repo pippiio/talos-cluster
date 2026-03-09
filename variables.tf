@@ -8,7 +8,7 @@ locals {
 variable "cluster" {
   description = <<EOF
     Talos cluster configurastion:
-      check_healty: Enables or disables a healty check towards the cluster, that can be depended on for other tasks
+      perform_healthcheck: Enables or disables a healty check towards the cluster, that can be depended on for other tasks
       hostname: The hostname of the talos kubernetes cluster
       name: The name of the talos kubernetes cluster
       disk_selector: CEL expression to filter disks in output
@@ -29,8 +29,8 @@ variable "cluster" {
           interfaces:
             key: interface id
             value:
-              ipv4: ipv4 address, must be a valid cidr ipv4 pattern (e.x. 10.0.0.10/24)
-              routes: A map of routes structured <network-cidr>=<gateway-ip>
+              ipv4_address_cidr: IPv4 address assigned to the interface, including prefix length (e.g., 192.168.1.10/24)
+              routes: A map of routes structured <network-ipv4_address_cidr>=<gateway-ip>
               mtu: Mtu of network
               trusted: Shall the interface subnet be trusted and added to the certificates SAN
               bond: Bond settings for bonding NICs
@@ -47,16 +47,16 @@ variable "cluster" {
       image: Custom image for all nodes
       name_servers: A list of the nameservers to use in the cluster
       time_servers: A set of NTP time server hostnames used for nodes
-      default_routes: A map of default routes structured <network-cidr>=<gateway-ip>
+      default_routes: A map of default routes structured <network-ipv4_address_cidr>=<gateway-ip>
       schedule_on_controlplanes: Enalbes scheduling on the control plane nodes
       kubeadm_cert_lifetime: Lifetime of the cubeconfig kubeadm certs (defaults to 12 hours)
   EOF
 
   type = object({
-    check_healty  = optional(bool, true)
-    hostname      = string
-    name          = string
-    disk_selector = optional(string, "disk.size > 50u * GB && disk.readonly == false")
+    perform_healthcheck = optional(bool, true)
+    hostname            = string
+    name                = string
+    disk_selector       = optional(string, "disk.size > 50u * GB && disk.readonly == false")
     nodes = map(object({
       type         = string
       install_disk = string
@@ -68,11 +68,11 @@ variable "cluster" {
         effect = string
       })), {})
       interfaces = map(object({
-        ipv4    = string
-        routes  = optional(map(string))
-        mtu     = optional(number)
-        trusted = optional(bool, true)
-        primary = optional(bool, true)
+        ipv4_address_cidr = string
+        routes            = optional(map(string))
+        mtu               = optional(number)
+        trusted           = optional(bool, true)
+        primary           = optional(bool, true)
         bond = optional(object({
           mode             = optional(string, "active-backup")
           miimon           = optional(number, 100)
@@ -148,16 +148,16 @@ variable "cluster" {
   }
 
   validation {
-    error_message = "One or more invalid cluster.nodes[].interface[].ipv4"
+    error_message = "One or more invalid cluster.nodes[].interface[].ipv4_address_cidr"
     condition = alltrue(flatten([
       for node in values(var.cluster.nodes) : [
         for interface in coalesce(node.interfaces, {}) :
-        can(regex(local.cidr_pattern, interface.ipv4))
+        can(regex(local.cidr_pattern, interface.cidr))
     ]]))
   }
 
   validation {
-    error_message = "One or more invalid cluster.nodes[].interface[].routes[] key (network cidr)"
+    error_message = "One or more invalid cluster.nodes[].interface[].routes[] key (network ipv4_address_cidr)"
     condition = alltrue(flatten([
       for node in values(var.cluster.nodes) : [
         for interface in node.interfaces : [
@@ -175,7 +175,7 @@ variable "cluster" {
   }
 
   validation {
-    error_message = "One or more invalid cluster.default_routes[] key (network cidr)"
+    error_message = "One or more invalid cluster.default_routes[] key (network ipv4_address_cidr)"
     condition = alltrue(flatten([
       for network in keys(var.cluster.default_routes) : can(regex(local.cidr_pattern, network))
     ]))

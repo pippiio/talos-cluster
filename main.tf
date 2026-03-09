@@ -35,7 +35,7 @@ resource "talos_machine_configuration_apply" "this" {
   for_each = var.cluster.nodes
 
   node = coalesce(each.value.temporary_ip, one([
-    for interface in each.value.interfaces : split("/", interface.ipv4)[0]
+    for interface in each.value.interfaces : split("/", interface.ipv4_address_cidr)[0]
     if interface.primary
   ]))
   client_configuration        = talos_machine_secrets.this.client_configuration
@@ -84,8 +84,8 @@ resource "talos_machine_configuration_apply" "this" {
 }
 
 resource "talos_machine_bootstrap" "this" {
-  node                 = one([
-    for interface in values(local.control_plane_nodes)[0].interfaces : split("/", interface.ipv4)[0]
+  node = one([
+    for interface in values(local.control_plane_nodes)[0].interfaces : split("/", interface.ipv4_address_cidr)[0]
     if interface.primary
   ])
   client_configuration = talos_machine_secrets.this.client_configuration
@@ -95,8 +95,8 @@ resource "talos_machine_bootstrap" "this" {
 
 resource "talos_cluster_kubeconfig" "this" {
   client_configuration = talos_machine_secrets.this.client_configuration
-  node                 = one([
-    for interface in values(local.control_plane_nodes)[0].interfaces : split("/", interface.ipv4)[0]
+  node = one([
+    for interface in values(local.control_plane_nodes)[0].interfaces : split("/", interface.ipv4_address_cidr)[0]
     if interface.primary
   ])
 
@@ -104,15 +104,15 @@ resource "talos_cluster_kubeconfig" "this" {
 }
 
 data "talos_cluster_health" "this" {
-  count = var.cluster.check_healty ? 1 : 0
+  count = var.cluster.perform_healthcheck ? 1 : 0
 
   client_configuration = data.talos_client_configuration.this.client_configuration
   control_plane_nodes = [for node in local.control_plane_nodes : one([
-    for interface in node.interfaces : split("/", interface.ipv4)[0]
+    for interface in node.interfaces : split("/", interface.ipv4_address_cidr)[0]
     if interface.primary
   ])]
   worker_nodes = [for node in local.worker_nodes : one([
-    for interface in node.interfaces : split("/", interface.ipv4)[0]
+    for interface in node.interfaces : split("/", interface.ipv4_address_cidr)[0]
     if interface.primary
   ])]
   endpoints = [var.cluster.hostname]
@@ -132,7 +132,7 @@ data "talos_machine_disks" "this" {
 
   client_configuration = talos_machine_secrets.this.client_configuration
   node = one([
-    for interface in each.value.interfaces : split("/", interface.ipv4)[0]
+    for interface in each.value.interfaces : split("/", interface.ipv4_address_cidr)[0]
     if interface.primary
   ])
   selector = var.cluster.disk_selector
@@ -159,7 +159,7 @@ locals {
   trusted_subnets = toset(
     flatten([for node, node_value in var.cluster.nodes : [
       for interface, interface_value in node_value.interfaces : [
-        interface_value.trusted ? [cidrsubnet(interface_value.ipv4, 0, 0)] : []
+        interface_value.trusted ? [ipv4_address_cidrsubnet(interface_value.ipv4_address_cidr, 0, 0)] : []
       ]
     ]])
   )
