@@ -34,7 +34,10 @@ resource "talos_machine_secrets" "this" {}
 resource "talos_machine_configuration_apply" "this" {
   for_each = var.cluster.nodes
 
-  node                        = coalesce(each.value.temporary_ip, each.key)
+  node = coalesce(each.value.temporary_ip, one([
+    for interface in each.value.interfaces : split("/", interface.ipv4_address_cidr)[0]
+    if interface.primary
+  ]))
   client_configuration        = talos_machine_secrets.this.client_configuration
   machine_configuration_input = data.talos_machine_configuration.this[each.value.type].machine_configuration
 
@@ -43,7 +46,7 @@ resource "talos_machine_configuration_apply" "this" {
       templatefile("${path.module}/templates/machine.yaml.tmpl", {
         type                  = each.value.type
         cluster_endpoint      = var.cluster.hostname
-        hostname              = coalesce(each.value.hostname, each.key)
+        hostname              = each.key
         install_disk          = each.value.install_disk
         disks                 = each.value.disks
         labels                = each.value.labels
@@ -75,13 +78,16 @@ resource "talos_machine_configuration_apply" "this" {
       apiVersion = "v1alpha1"
       kind       = "HostnameConfig"
       auto       = "off"
-      hostname   = coalesce(each.value.hostname, each.key)
+      hostname   = each.key
     }),
   ]
 }
 
 resource "talos_machine_bootstrap" "this" {
-  node                 = keys(local.control_plane_nodes)[0]
+  node = one([
+    for interface in values(local.control_plane_nodes)[0].interfaces : split("/", interface.ipv4_address_cidr)[0]
+    if interface.primary
+  ])
   client_configuration = talos_machine_secrets.this.client_configuration
 
   depends_on = [talos_machine_configuration_apply.this]
@@ -89,28 +95,27 @@ resource "talos_machine_bootstrap" "this" {
 
 resource "talos_cluster_kubeconfig" "this" {
   client_configuration = talos_machine_secrets.this.client_configuration
-  node                 = keys(local.control_plane_nodes)[0]
+  node = one([
+    for interface in values(local.control_plane_nodes)[0].interfaces : split("/", interface.ipv4_address_cidr)[0]
+    if interface.primary
+  ])
 
   depends_on = [talos_machine_bootstrap.this]
 }
 
-data "dns_a_record_set" "control_plane_nodes" {
-  for_each = local.control_plane_nodes
-
-  host = each.key
-}
-
-data "dns_a_record_set" "worker_nodes" {
-  for_each = local.worker_nodes
-
-  host = each.key
-}
-
 data "talos_cluster_health" "this" {
+  count = var.cluster.perform_healthcheck ? 1 : 0
+
   client_configuration = data.talos_client_configuration.this.client_configuration
-  control_plane_nodes  = [for _ in data.dns_a_record_set.control_plane_nodes : _.addrs[0]]
-  worker_nodes         = [for _ in data.dns_a_record_set.worker_nodes : _.addrs[0]]
-  endpoints            = [var.cluster.hostname]
+  control_plane_nodes = [for node in local.control_plane_nodes : one([
+    for interface in node.interfaces : split("/", interface.ipv4_address_cidr)[0]
+    if interface.primary
+  ])]
+  worker_nodes = [for node in local.worker_nodes : one([
+    for interface in node.interfaces : split("/", interface.ipv4_address_cidr)[0]
+    if interface.primary
+  ])]
+  endpoints = [var.cluster.hostname]
 
   timeouts = {
     read = "10m"
@@ -126,8 +131,11 @@ data "talos_machine_disks" "this" {
   for_each = local.worker_nodes
 
   client_configuration = talos_machine_secrets.this.client_configuration
-  node                 = each.key
-  selector             = var.cluster.disk_selector
+  node = one([
+    for interface in each.value.interfaces : split("/", interface.ipv4_address_cidr)[0]
+    if interface.primary
+  ])
+  selector = var.cluster.disk_selector
   depends_on = [
     talos_machine_configuration_apply.this,
   ]
@@ -151,7 +159,7 @@ locals {
   trusted_subnets = toset(
     flatten([for node, node_value in var.cluster.nodes : [
       for interface, interface_value in node_value.interfaces : [
-        interface_value.trusted ? [cidrsubnet(interface_value.ipv4, 0, 0)] : []
+        interface_value.trusted ? [ipv4_address_cidrsubnet(interface_value.ipv4_address_cidr, 0, 0)] : []
       ]
     ]])
   )

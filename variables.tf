@@ -8,6 +8,7 @@ locals {
 variable "cluster" {
   description = <<EOF
     Talos cluster configurastion:
+      perform_healthcheck: Enables or disables a healty check towards the cluster, that can be depended on for other tasks
       hostname: The hostname of the talos kubernetes cluster
       name: The name of the talos kubernetes cluster
       disk_selector: CEL expression to filter disks in output
@@ -20,7 +21,6 @@ variable "cluster" {
             key: device
             value: mountpoint
           image: Custom image for installation (overrides cluster image)
-          hostname: Optional hostname (defualts to node key)
           labels: List of node labels
           taints: List of node taints
             key: Taint key
@@ -29,9 +29,8 @@ variable "cluster" {
           interfaces:
             key: interface id
             value:
-              dhcp: true to enable dhcp
-              ipv4: ipv4 address, must be a valid cidr ipv4 pattern (e.x. 10.0.0.10/24)
-              routes: A map of routes structured <network-cidr>=<gateway-ip>
+              ipv4_address_cidr: IPv4 address assigned to the interface, including prefix length (e.g., 192.168.1.10/24)
+              routes: A map of routes structured <network-ipv4_address_cidr>=<gateway-ip>
               mtu: Mtu of network
               trusted: Shall the interface subnet be trusted and added to the certificates SAN
               bond: Bond settings for bonding NICs
@@ -48,32 +47,32 @@ variable "cluster" {
       image: Custom image for all nodes
       name_servers: A list of the nameservers to use in the cluster
       time_servers: A set of NTP time server hostnames used for nodes
-      default_routes: A map of default routes structured <network-cidr>=<gateway-ip>
+      default_routes: A map of default routes structured <network-ipv4_address_cidr>=<gateway-ip>
       schedule_on_controlplanes: Enalbes scheduling on the control plane nodes
       kubeadm_cert_lifetime: Lifetime of the cubeconfig kubeadm certs (defaults to 12 hours)
   EOF
 
   type = object({
-    hostname      = string
-    name          = string
-    disk_selector = optional(string, "disk.size > 50u * GB && disk.readonly == false")
+    perform_healthcheck = optional(bool, true)
+    hostname            = string
+    name                = string
+    disk_selector       = optional(string, "disk.size > 50u * GB && disk.readonly == false")
     nodes = map(object({
       type         = string
       install_disk = string
       disks        = optional(map(string), {})
       image        = optional(string)
-      hostname     = optional(string) # defaults to key
       labels       = optional(map(string), {})
       taints = optional(map(object({
         value  = optional(string)
         effect = string
       })), {})
       interfaces = map(object({
-        dhcp        = bool
-        ipv4        = optional(string)
-        routes      = optional(map(string))
-        mtu         = optional(number)
-        trusted     = optional(bool, true)
+        ipv4_address_cidr = string
+        routes            = optional(map(string))
+        mtu               = optional(number)
+        trusted           = optional(bool, true)
+        primary           = optional(bool, true)
         bond = optional(object({
           mode             = optional(string, "active-backup")
           miimon           = optional(number, 100)
@@ -113,6 +112,11 @@ variable "cluster" {
   }
 
   validation {
+    error_message = "At least one node w. type controlplane is required."
+    condition     = length([for node in var.cluster.nodes : node if node.type == "controlplane"]) > 0
+  }
+
+  validation {
     error_message = "One or more invalid cluster.nodes key (hostname)."
     condition = alltrue([
       for _ in keys(var.cluster.nodes) :
@@ -144,16 +148,16 @@ variable "cluster" {
   }
 
   validation {
-    error_message = "One or more invalid cluster.nodes[].interface[].ipv4"
+    error_message = "One or more invalid cluster.nodes[].interface[].ipv4_address_cidr"
     condition = alltrue(flatten([
       for node in values(var.cluster.nodes) : [
         for interface in coalesce(node.interfaces, {}) :
-        interface.ipv4 == null || can(regex(local.cidr_pattern, interface.ipv4))
+        can(regex(local.cidr_pattern, interface.cidr))
     ]]))
   }
 
   validation {
-    error_message = "One or more invalid cluster.nodes[].interface[].routes[] key (network cidr)"
+    error_message = "One or more invalid cluster.nodes[].interface[].routes[] key (network ipv4_address_cidr)"
     condition = alltrue(flatten([
       for node in values(var.cluster.nodes) : [
         for interface in node.interfaces : [
@@ -171,7 +175,7 @@ variable "cluster" {
   }
 
   validation {
-    error_message = "One or more invalid cluster.default_routes[] key (network cidr)"
+    error_message = "One or more invalid cluster.default_routes[] key (network ipv4_address_cidr)"
     condition = alltrue(flatten([
       for network in keys(var.cluster.default_routes) : can(regex(local.cidr_pattern, network))
     ]))
@@ -192,6 +196,16 @@ variable "cluster" {
         (coalesce(var.cluster.encryption.passphrase != null && var.cluster.encryption.passphrase != "", false) ? 1 : 0)
       ) == 1
     )
+  }
+
+  validation {
+    error_message = "Each node must have exactly one interface with primary = true."
+    condition = alltrue([
+      for node in values(var.cluster.nodes) :
+      sum([
+        for interface in node.interfaces : (interface.primary ? 1 : 0)
+      ]) == 1
+    ])
   }
 }
 
