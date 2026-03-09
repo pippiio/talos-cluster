@@ -152,7 +152,7 @@ variable "cluster" {
     condition = alltrue(flatten([
       for node in values(var.cluster.nodes) : [
         for interface in coalesce(node.interfaces, {}) :
-        can(regex(local.cidr_pattern, interface.cidr))
+        can(regex(local.cidr_pattern, interface.ipv4_address_cidr))
     ]]))
   }
 
