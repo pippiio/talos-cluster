@@ -159,7 +159,7 @@ locals {
   trusted_subnets = toset(
     flatten([for node, node_value in var.cluster.nodes : [
       for interface, interface_value in node_value.interfaces : [
-        interface_value.trusted ? [ipv4_address_cidrsubnet(interface_value.ipv4_address_cidr, 0, 0)] : []
+        interface_value.trusted ? [cidrsubnet(interface_value.ipv4_address_cidr, 0, 0)] : []
       ]
     ]])
   )
