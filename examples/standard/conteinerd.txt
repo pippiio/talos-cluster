@@ -1,0 +1,44 @@
+192.168.88.12: {"level":"info","msg":"starting containerd","revision":"c74fd8780002eb26bd5940ae339d690d891221c2","time":"1970-01-01T00:00:03.243332183Z","version":"v2.1.6"}
+192.168.88.12: {"id":"io.containerd.content.v1.content","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.257390424Z","type":"io.containerd.content.v1"}
+192.168.88.12: {"id":"io.containerd.image-verifier.v1.bindir","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.257660886Z","type":"io.containerd.image-verifier.v1"}
+192.168.88.12: {"id":"io.containerd.warning.v1.deprecations","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.257727442Z","type":"io.containerd.warning.v1"}
+192.168.88.12: {"id":"io.containerd.snapshotter.v1.native","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.257765257Z","type":"io.containerd.snapshotter.v1"}
+192.168.88.12: {"id":"io.containerd.snapshotter.v1.overlayfs","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.257939831Z","type":"io.containerd.snapshotter.v1"}
+192.168.88.12: {"id":"io.containerd.event.v1.exchange","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.258525016Z","type":"io.containerd.event.v1"}
+192.168.88.12: {"id":"io.containerd.monitor.task.v1.cgroups","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.258602016Z","type":"io.containerd.monitor.task.v1"}
+192.168.88.12: {"id":"io.containerd.metadata.v1.bolt","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.263543164Z","type":"io.containerd.metadata.v1"}
+192.168.88.12: {"level":"info","msg":"metadata content store policy set","policy":"shared","time":"1970-01-01T00:00:03.263802461Z"}
+192.168.88.12: {"id":"io.containerd.gc.v1.scheduler","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.264635757Z","type":"io.containerd.gc.v1"}
+192.168.88.12: {"id":"io.containerd.differ.v1.walking","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.264777201Z","type":"io.containerd.differ.v1"}
+192.168.88.12: {"id":"io.containerd.lease.v1.manager","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.264834257Z","type":"io.containerd.lease.v1"}
+192.168.88.12: {"id":"io.containerd.service.v1.containers-service","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.264899627Z","type":"io.containerd.service.v1"}
+192.168.88.12: {"id":"io.containerd.service.v1.content-service","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.264960386Z","type":"io.containerd.service.v1"}
+192.168.88.12: {"id":"io.containerd.service.v1.diff-service","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.265013942Z","type":"io.containerd.service.v1"}
+192.168.88.12: {"id":"io.containerd.service.v1.images-service","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.265053738Z","type":"io.containerd.service.v1"}
+192.168.88.12: {"id":"io.containerd.service.v1.introspection-service","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.265088738Z","type":"io.containerd.service.v1"}
+192.168.88.12: {"id":"io.containerd.service.v1.namespaces-service","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.265120035Z","type":"io.containerd.service.v1"}
+192.168.88.12: {"id":"io.containerd.service.v1.snapshots-service","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.265154479Z","type":"io.containerd.service.v1"}
+192.168.88.12: {"id":"io.containerd.shim.v1.manager","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.265182257Z","type":"io.containerd.shim.v1"}
+192.168.88.12: {"id":"io.containerd.runtime.v2.task","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.265214516Z","type":"io.containerd.runtime.v2"}
+192.168.88.12: {"id":"io.containerd.service.v1.tasks-service","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.265519220Z","type":"io.containerd.service.v1"}
+192.168.88.12: {"id":"io.containerd.grpc.v1.containers","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.265577646Z","type":"io.containerd.grpc.v1"}
+192.168.88.12: {"id":"io.containerd.grpc.v1.content","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.265615775Z","type":"io.containerd.grpc.v1"}
+192.168.88.12: {"id":"io.containerd.grpc.v1.diff","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.265648553Z","type":"io.containerd.grpc.v1"}
+192.168.88.12: {"id":"io.containerd.grpc.v1.events","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.265692201Z","type":"io.containerd.grpc.v1"}
+192.168.88.12: {"id":"io.containerd.grpc.v1.images","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.265749016Z","type":"io.containerd.grpc.v1"}
+192.168.88.12: {"id":"io.containerd.grpc.v1.introspection","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.265784053Z","type":"io.containerd.grpc.v1"}
+192.168.88.12: {"id":"io.containerd.grpc.v1.leases","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.265834109Z","type":"io.containerd.grpc.v1"}
+192.168.88.12: {"id":"io.containerd.grpc.v1.namespaces","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.265871553Z","type":"io.containerd.grpc.v1"}
+192.168.88.12: {"id":"io.containerd.grpc.v1.snapshots","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.265911016Z","type":"io.containerd.grpc.v1"}
+192.168.88.12: {"id":"io.containerd.streaming.v1.manager","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.265947405Z","type":"io.containerd.streaming.v1"}
+192.168.88.12: {"id":"io.containerd.grpc.v1.streaming","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.265990146Z","type":"io.containerd.grpc.v1"}
+192.168.88.12: {"id":"io.containerd.grpc.v1.tasks","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.266021479Z","type":"io.containerd.grpc.v1"}
+192.168.88.12: {"id":"io.containerd.transfer.v1.local","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.266060720Z","type":"io.containerd.transfer.v1"}
+192.168.88.12: {"id":"io.containerd.grpc.v1.transfer","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.266151349Z","type":"io.containerd.grpc.v1"}
+192.168.88.12: {"id":"io.containerd.grpc.v1.version","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.266186757Z","type":"io.containerd.grpc.v1"}
+192.168.88.12: {"id":"io.containerd.grpc.v1.healthcheck","level":"info","msg":"loading plugin","time":"1970-01-01T00:00:03.266214831Z","type":"io.containerd.grpc.v1"}
+192.168.88.12: {"address":"/system/run/containerd/containerd.sock.ttrpc","level":"info","msg":"serving...","time":"1970-01-01T00:00:03.267208535Z"}
+192.168.88.12: {"address":"/system/run/containerd/containerd.sock","level":"info","msg":"serving...","time":"1970-01-01T00:00:03.267484349Z"}
+192.168.88.12: {"level":"info","msg":"containerd successfully booted in 0.028255s","time":"1970-01-01T00:00:03.267567961Z"}
+192.168.88.12: {"address":"unix:///run/containerd/s/814eeaf75962b52d1228c72642b2a1e34f6ad18299621a2bc0a0d887e86f9db6","level":"info","msg":"connecting to shim apid","namespace":"system","protocol":"ttrpc","time":"2026-04-21T10:58:08.369681353Z","version":3}
+192.168.88.12: {"address":"unix:///run/containerd/s/5fa90b83e183f45a761a15c4d691cc248504e7544f0fd8787e47e42f16c45345","level":"info","msg":"connecting to shim trustd","namespace":"system","protocol":"ttrpc","time":"2026-04-21T10:58:51.145223992Z","version":3}
