@@ -5,7 +5,7 @@ machine:
   - ${hostname}
 %{ for _id, _interface in interfaces ~}
 %{ if _interface.ipv4_address_cidr != null }
-  - ${_interface.ipv4_address_cidr}
+  - ${split("/", _interface.ipv4_address_cidr)[0]}
 %{ endif }
 %{ endfor ~}
 %{ if cluster_endpoint != "" }
