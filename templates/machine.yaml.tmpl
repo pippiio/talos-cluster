@@ -142,6 +142,13 @@ machine:
 %{ endfor ~}
 %{ endif }
 
+%{ if length(sysctls) > 0 }
+  sysctls:
+    %{ for key, value in sysctls ~}
+      ${key}: "${value}"
+    %{ endfor ~}
+%{ endif }
+
 cluster:
   adminKubeconfig:
     certLifetime: ${kubeadm_cert_lifetime}

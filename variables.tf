@@ -40,6 +40,7 @@ variable "cluster" {
                 xmit_hash_policy: Optional xmit hash policy for the bond
                 interfaces: List of interfaces to bond together
           temporary_ip: A temporary ip for installation
+          sysctls: Settings for Linux sysctls
       encryption: Encryption options for Talos install disks
         node_id: Use node_id as the encryption key
         passphrase: use passphrase as the encryption key
@@ -82,6 +83,7 @@ variable "cluster" {
         }))
       }))
       temporary_ip = optional(string)
+      sysctls      = optional(map(string), {})
     }))
 
     encryption = optional(object({
