@@ -142,11 +142,9 @@ machine:
 %{ endfor ~}
 %{ endif }
 
+
 %{ if length(sysctls) > 0 }
-  sysctls:
-    %{ for key, value in sysctls ~}
-      ${key}: "${value}"
-    %{ endfor ~}
+  sysctls: ${jsonencode(sysctls)}
 %{ endif }
 
 cluster:
