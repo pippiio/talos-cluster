@@ -142,6 +142,11 @@ machine:
 %{ endfor ~}
 %{ endif }
 
+
+%{ if length(sysctls) > 0 }
+  sysctls: ${jsonencode(sysctls)}
+%{ endif }
+
 cluster:
   adminKubeconfig:
     certLifetime: ${kubeadm_cert_lifetime}

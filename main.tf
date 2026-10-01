@@ -63,6 +63,7 @@ resource "talos_machine_configuration_apply" "this" {
             routes = coalesce(interface.routes, var.cluster.default_routes)
           })
         }
+        sysctls = each.value.sysctls
     }), "/\\n\\n+/", "\n"),
     yamlencode({
       cluster = {
